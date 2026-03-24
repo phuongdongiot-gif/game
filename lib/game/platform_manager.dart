@@ -35,12 +35,12 @@ class PlatformManager extends Component with HasGameRef<RunnerGame> {
     if (currentX < gameRef.size.x + 600) {
       // 15% chance for a pit
       if (random.nextDouble() < 0.15) {
-        double gap = random.nextDouble() * 150 + 100; // 100-250px gap
+        double gap = random.nextDouble() * 80 + 90; // 90-170px gap
         currentX += gap;
       }
 
-      // Height variation for stairs
-      double yChange = (random.nextDouble() - 0.5) * 160; 
+      // Height variation for stairs (less aggressive)
+      double yChange = (random.nextDouble() - 0.5) * 100; 
       lastY += yChange;
       
       // Clamp Y to safe screen values
