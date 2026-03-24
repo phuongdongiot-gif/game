@@ -6,8 +6,12 @@ import '../main.dart'; // for prefs
 import 'player.dart';
 import 'background.dart';
 import 'obstacle_manager.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'platform_manager.dart';
+import 'package:flame/particles.dart';
+import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
+import 'dart:math';
+import 'package:flame_audio/flame_audio.dart';
 
 enum GameState { menu, playing, gameOver }
 
@@ -28,7 +32,8 @@ class RunnerGame extends FlameGame with HasCollisionDetection, TapDetector, Vert
   Future<void> onLoad() async {
     highScore = prefs.getInt('highScore') ?? 0;
 
-    await FlameAudio.audioCache.loadAll(['jump.wav', 'hit.wav', 'score.wav']);
+    FlameAudio.bgm.initialize();
+    await FlameAudio.audioCache.loadAll(['jump.wav', 'hit.wav', 'score.wav', 'bgm.wav', 'death_music.wav']);
 
     background = GameBackground();
     add(background);
@@ -48,6 +53,9 @@ class RunnerGame extends FlameGame with HasCollisionDetection, TapDetector, Vert
     currentScore = 0;
     scoreNotifier.value = 0;
     gameSpeed = baseSpeed;
+    
+    FlameAudio.bgm.play('bgm.wav', volume: 0.25);
+    
     platformManager.reset();
     player.reset();
     obstacleManager.reset();
@@ -59,7 +67,55 @@ class RunnerGame extends FlameGame with HasCollisionDetection, TapDetector, Vert
   void gameOver() {
     if (gameState == GameState.gameOver) return;
     gameState = GameState.gameOver;
-    FlameAudio.play('hit.wav');
+    FlameAudio.play('death_music.wav');
+    FlameAudio.bgm.stop();
+    
+    // Nổ ánh sao 
+    final random = Random();
+    add(ParticleSystemComponent(
+      particle: Particle.generate(
+        count: 30, // 30 ngôi sao
+        lifespan: 1.2,
+        generator: (i) {
+          final speed = random.nextDouble() * 300 + 100;
+          final angle = random.nextDouble() * 2 * pi;
+          final velocity = Vector2(cos(angle), sin(angle)) * speed;
+          
+          return AcceleratedParticle(
+            position: player.position.clone() + player.size / 2, // Xuất phát từ giữa nhân vật
+            speed: velocity,
+            child: ComputedParticle(
+              renderer: (canvas, particle) {
+                final opacity = 1.0 - particle.progress;
+                final paint = Paint()..color = Colors.amberAccent.withOpacity(opacity);
+                final r = 6.0 * opacity + 2.0; 
+                
+                // Vẽ path ngôi sao 5 cánh
+                Path starPath = Path();
+                double outer = r * 2;
+                double inner = r;
+                for (int j = 0; j < 5; j++) {
+                  double a1 = (-pi/2) + j * (2*pi/5);
+                  double a2 = (-pi/2) + j * (2*pi/5) + (pi/5);
+                  if (j == 0) {
+                    starPath.moveTo(cos(a1) * outer, sin(a1) * outer);
+                  } else {
+                    starPath.lineTo(cos(a1) * outer, sin(a1) * outer);
+                  }
+                  starPath.lineTo(cos(a2) * inner, sin(a2) * inner);
+                }
+                starPath.close();
+                canvas.drawPath(starPath, paint);
+              }
+            ),
+          );
+        },
+      ),
+    ));
+
+    // Giấu nhân vật đi
+    player.die();
+
     if (currentScore.toInt() > highScore) {
       highScore = currentScore.toInt();
       prefs.setInt('highScore', highScore);
@@ -70,6 +126,7 @@ class RunnerGame extends FlameGame with HasCollisionDetection, TapDetector, Vert
 
   void resetToMenu() {
     gameState = GameState.menu;
+    FlameAudio.bgm.stop();
     platformManager.reset();
     player.reset();
     obstacleManager.reset();

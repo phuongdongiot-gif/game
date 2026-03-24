@@ -14,13 +14,14 @@ class Player extends SpriteAnimationGroupComponent<PlayerState> with CollisionCa
   static const double slideHeight = 50.0;
 
   double velocityY = 0.0;
-  final double gravity = 1800.0;
+  final double gravity = 1500.0;
   final double jumpPower = -700.0;
   bool isJumping = false;
   bool isOnGround = false;
   
   double slideTimer = 0.0;
   bool isSliding = false;
+  bool isDead = false;
 
   late RectangleHitbox hitbox;
 
@@ -80,19 +81,35 @@ class Player extends SpriteAnimationGroupComponent<PlayerState> with CollisionCa
   void reset() {
     position = Vector2(100, gameRef.size.y - 300);
     size = Vector2(playerWidth, playerHeight);
-    velocityY = 0;
+    velocityY = 0.0;
     isJumping = false;
     isOnGround = false;
     isSliding = false;
+    isDead = false;
+    angle = 0.0; // Reset spin
     slideTimer = 0;
     current = PlayerState.run;
     hitbox.position = Vector2(25, 15);
     hitbox.size = Vector2(30, 65);
   }
 
+  void die() {
+    isDead = true;
+    velocityY = -600.0; // Bounces high up into the air
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
+
+    if (isDead) {
+      // Spinning out of control and falling down
+      velocityY += gravity * dt;
+      position.y += velocityY * dt;
+      position.x += 150 * dt; // Drift right slowly
+      angle += 10 * dt; // Spin wildly!
+      return; // Ignore controls and platform collisions
+    }
 
     if (gameRef.gameState != GameState.playing) return;
 
