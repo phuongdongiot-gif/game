@@ -1,0 +1,31 @@
+# Endless Runner Game Task Plan
+
+- [x] Project Setup
+  - [x] Initialize standard Flutter project
+  - [x] Add dependencies (`flame`, `shared_preferences`)
+- [x] Game Engine Foundation ([game/runner_game.dart](file:///C:/Users/catmu/Downloads/flam/lib/game/runner_game.dart))
+  - [x] Set up `FlameGame` instance
+  - [x] Create simple state management (Playing, GameOver, Menu)
+  - [x] Initialize score tracking
+- [x] Player Component ([game/player.dart](file:///C:/Users/catmu/Downloads/flam/lib/game/player.dart))
+  - [x] Position, velocity, gravity mechanics
+  - [x] Jump functionality (tap)
+  - [x] Slide functionality (swipe down)
+  - [x] Collision hitbox
+- [x] Obstacle System ([game/obstacle.dart](file:///C:/Users/catmu/Downloads/flam/lib/game/obstacle.dart))
+  - [x] Spawner mechanism for obstacles
+  - [x] Different obstacle types (low for jump, high for slide)
+  - [x] Difficulty scaling (speed increases over time)
+- [x] Environment ([game/background.dart](file:///C:/Users/catmu/Downloads/flam/lib/game/background.dart))
+  - [x] Parallax scrolling background
+- [x] User Interface ([ui/](file:///C:/Users/catmu/Downloads/flam/lib/ui/game_over.dart#10-85))
+  - [x] Main Menu ([main_menu.dart](file:///C:/Users/catmu/Downloads/flam/lib/ui/main_menu.dart)) with Play button and High score
+  - [x] Game Over Screen ([game_over.dart](file:///C:/Users/catmu/Downloads/flam/lib/ui/game_over.dart)) with Restart
+  - [x] HUD for current score
+- [x] Game Logic Integration
+  - [x] Collision detection (Player vs Obstacle)
+  - [x] Score tallying and persistent high score
+  - [x] Restart mechanism
+- [x] Optimization and Polish
+  - [x] Code structure and comments
+  - [x] Ensure 60fps setup and clean widget tree
